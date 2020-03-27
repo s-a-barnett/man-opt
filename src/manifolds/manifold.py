@@ -30,11 +30,11 @@ class Manifold(ABC):
         pass
 
     @abstractmethod
-    def _riemannianGradient(self, euclidenGradient):
+    def _riemannianGradient(self, euclideanGradient):
         pass
 
     @abstractmethod
-    def _riemannianHessian(self, euclideanHessian):
+    def _riemannianHessian(self, euclideanGradient, euclideanHessian):
         pass
 
     @abstractmethod

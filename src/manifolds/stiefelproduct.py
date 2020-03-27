@@ -36,10 +36,10 @@ class StiefelProduct(Manifold):
     def _riemannianGradient(self, euclideanGradient):
         return lambda xx: self._project(xx, euclideanGradient(xx))
 
-    def _riemannianHessian(self, euclidenGradient, euclideanHessian):
+    def _riemannianHessian(self, euclideanGradient, euclideanHessian):
 
         def rH(xx, vv):
-            r_0 = self._project(xx, euclideanHessian(xx, vv))[0] - (vv[0] @ sym(xx[0].T @ euclidenGradient(xx)[0]))
+            r_0 = self._project(xx, euclideanHessian(xx, vv))[0] - (vv[0] @ sym(xx[0].T @ euclideanGradient(xx)[0]))
             r_1 = euclideanHessian(xx, vv)[1]
             return r_0, r_1
 

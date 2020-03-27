@@ -26,7 +26,7 @@ class LinearProduct(Manifold):
     def _riemannianGradient(self, euclideanGradient):
         return euclideanGradient
 
-    def _riemannianHessian(self, euclideanHessian):
+    def _riemannianHessian(self, euclideanGradient, euclideanHessian):
         return euclideanHessian
 
     def _randomPoint(self):
