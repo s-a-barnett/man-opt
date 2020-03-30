@@ -40,3 +40,15 @@ class Manifold(ABC):
     @abstractmethod
     def _randomPoint(self):
         pass
+
+    @abstractmethod
+    def _zeroTangent(self):
+        pass
+
+    @abstractmethod
+    def _addTangent(self, ss, tt):
+        pass
+
+    @abstractmethod
+    def _multiplyTangent(self, alpha, ss):
+        pass

@@ -10,6 +10,7 @@ class FixedRank(Manifold):
         self.m = m
         self.n = n
         self.r = r
+        self.dim = r * (m + n - r)
 
     def _reprToPoint(self, xx):
         return xx[0] @ xx[1] @ xx[2].T
@@ -68,3 +69,14 @@ class FixedRank(Manifold):
         di = np.diag_indices(self.r)
         Sigma[di] = np.sort(np.random.rand(self.r))[::-1]
         return U, Sigma, V
+
+    def _zeroTangent(self):
+        return np.zeros((self.m, self.r)), np.zeros((self.r, self.r)), np.zeros((self.n, self.r))
+
+    def _addTangent(self, ss, tt):
+        U_p0, M0, V_p0 = ss; U_p1, M1, V_p1 = tt;
+        return U_p0 + U_p1, M0 + M1, V_p0 + V_p1
+
+    def _multiplyTangent(self, alpha, ss):
+        U_p, M, V_p = ss
+        return alpha * U_p, alpha * M, alpha * V_p
