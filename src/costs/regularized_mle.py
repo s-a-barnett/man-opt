@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import norm
 
 class RegularizedMLE(Cost):
 
@@ -11,12 +12,12 @@ class RegularizedMLE(Cost):
         self.B = B
         self.mu = mu
 
-        self.f = lambda X: 0.5 * (np.sum((X - Y) * B) ** 2)
+        self.f = lambda X: 0.5 * (norm((X - Y) * B) ** 2)
         self.gradf = lambda X: ((X - Y) * B)
 
     def _eval(self, xx):
         L, R = xx
-        reg = (self.mu / 4) * (np.sum((L.T@L) - (R.T@R)) ** 2)
+        reg = (self.mu / 4) * (norm((L.T@L) - (R.T@R)) ** 2)
         return self.f(self.manifold._reprToPoint(xx)) + reg
 
     def _euclideanGradient(self, xx):

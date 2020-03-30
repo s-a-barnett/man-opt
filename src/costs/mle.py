@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import norm
 
 class MLE(Cost):
 
@@ -11,7 +12,7 @@ class MLE(Cost):
         self.B = B
 
     def _eval(self, xx):
-        return 0.5 * (np.sum((xx - self.Y) * self.B) ** 2)
+        return 0.5 * (norm((xx - self.Y) * self.B) ** 2)
 
     def _euclideanGradient(self, xx):
         return ((xx - self.Y) * self.B)
