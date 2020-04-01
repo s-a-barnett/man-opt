@@ -2,13 +2,17 @@ import numpy as np
 import progressbar
 from .solver import Solver
 import time
+import pdb
 
 class RiemannianGradientDescent(Solver):
 
     def __init__(self, manifold, cost, initGuess='random', maxiter=1000,
-                 timeiter=None, verbose=False, tau=0.8, r=1e-4):
+                 timeiter=None, verbose=False, tau=0.5, r=1e-4):
         self.manifold = manifold
         self.cost = cost
+        self.rmnGrad = self.manifold._riemannianGradient(self.cost._euclideanGradient)
+        self.rmnHess = self.manifold._riemannianHessian(self.cost._euclideanGradient, self.cost._euclideanHessian)
+
         self.maxiter = maxiter
         self.verbose = verbose
         self.tau = tau
@@ -25,40 +29,46 @@ class RiemannianGradientDescent(Solver):
             self.timeiter = timeiter
 
     def _step(self, xx):
-        grad = self.cost._riemannianGradient()(xx)
-        alpha = self._getStepSize(xx, grad)
-        xx_next = self.manifold._retract(xx, -alpha*grad)
-        if verbose == False:
+        multiply = self.manifold._multiplyTangent
+        grad = self.rmnGrad(xx)
+        fxx = self.cost._eval(xx)
+        alpha = self._getStepSize(xx, fxx, grad)
+        xx_next = self.manifold._retract(xx, multiply(-alpha, grad))
+        if self.verbose == False:
             return xx_next
         else:
-            return xx_next, grad
+            return xx_next, fxx, self.manifold._norm(grad)
 
-    def _getStepSize(self, xx, gradfxx):
+    def _getStepSize(self, xx, fxx, gradfxx):
         # compute backtracking line search
-        alpha = 1.0 # TODO: write dynamic alpha-bar
-        lhs = self.cost._eval(xx) - self.cost._eval(self.manifold._retract(xx, -alpha * gradfxx))
-        rhs = self.r * self.alpha * (self.manifold._norm(gradfxx) ** 2)
+        multiply = self.manifold._multiplyTangent
+        norm_gradfxx = self.manifold._norm(gradfxx)
+        alpha = 1 / norm_gradfxx # TODO: write dynamic alpha-bar
+        lhs = fxx - self.cost._eval(self.manifold._retract(xx, multiply(-alpha, gradfxx)))
+        rhs = self.r * alpha * (norm_gradfxx ** 2)
         while lhs < rhs:
-            alpha = self.tau * alpha
-            lhs = self.cost._eval(xx) - self.cost._eval(self.manifold._retract(xx, -alpha * gradfxx))
-            rhs = self.r * self.alpha * (self.manifold._norm(gradfxx) ** 2)
+            alpha *= self.tau
+            lhs = fxx - self.cost._eval(self.manifold._retract(xx, multiply(-alpha, gradfxx)))
+            rhs = self.r * alpha * (norm_gradfxx ** 2)
         return alpha
 
 
     def solve(self):
         xx = self.initGuess
-        if verbose == False:
+        if self.verbose == False:
             for ii in progressbar.progressbar(range(self.maxiter)):
                 xx = self._step(xx)
 
             return xx
         else:
             tic = time.time()
+            costs = []
             grads = []
             for ii in progressbar.progressbar(range(self.maxiter)):
-                xx, grad = self._step(xx)
+                xx, fxx, grad = self._step(xx)
                 grads.append(grad)
-                if ii == timeiter:
+                costs.append(fxx)
+                if ii == self.timeiter-1:
                     toc = time.time()
 
-            return xx, grads, (toc - tic)
+            return xx, costs, grads, (toc - tic)
