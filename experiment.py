@@ -61,6 +61,8 @@ def main(args):
     xx_final, costs, grads, time = solver.solve()
     print('total time to compute: {} seconds'.format(time))
     print(grads[-1])
+    print(np.min(grads))
+    print(np.min(costs))
 
     df_costs = pd.DataFrame(dict(time=np.arange(len(costs)),
                             value=costs))

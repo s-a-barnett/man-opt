@@ -33,7 +33,10 @@ class FixedRank(Manifold):
         block = np.concatenate([np.concatenate([Sigma+M, np.eye(r)], axis=1), \
                                 np.concatenate([np.eye(r), np.zeros((r, r))], axis=1)], \
                                 axis=0)
-        U_tilde, Sigma_tilde, Vh_tilde = randomized_svd(R_U @ block @ R_V.T, n_components = r)
+        U_tilde, Sigma_tilde, Vh_tilde = svd(R_U @ block @ R_V.T)
+        U_tilde = U_tilde[:, :r]
+        Sigma_tilde = Sigma_tilde[:r]
+        Vh_tilde = Vh_tilde[:r, :]
         return Q_U@U_tilde, np.diag(Sigma_tilde), Q_V@Vh_tilde.T
 
     def _project(self, xx, zz):
