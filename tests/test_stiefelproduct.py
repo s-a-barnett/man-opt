@@ -34,6 +34,12 @@ class TestStiefelProduct:
         rr = stiefelproduct._retract(xx, yy)
         assert np.allclose(rr[0], np.eye(m))
 
+    def test_retractZero(self, stiefelproduct):
+        X = stiefelproduct._randomPoint()
+        Z = stiefelproduct._zeroTangent()
+        R = stiefelproduct._retract(X, Z)
+        assert np.allclose(stiefelproduct._reprToPoint(X), stiefelproduct._reprToPoint(R))
+
     def test_project(self, stiefelproduct):
         m = stiefelproduct.m
         Z = np.random.randn(m, m); X = np.random.randn(m, m);

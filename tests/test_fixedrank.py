@@ -30,6 +30,23 @@ class TestFixedRank:
         rr = fixedrank._reprToPoint(fixedrank._retract(X, hh))
         assert np.linalg.matrix_rank(rr) == fixedrank.r
 
+    def test_retractZero(self, fixedrank):
+        X = fixedrank._randomPoint()
+        Z = fixedrank._zeroTangent()
+        R = fixedrank._retract(X, Z)
+        assert np.allclose(fixedrank._reprToPoint(X), fixedrank._reprToPoint(R))
+
     def test_reprToRandomPoint(self, fixedrank):
         X = fixedrank._reprToPoint(fixedrank._randomPoint())
         assert np.linalg.matrix_rank(X) == fixedrank.r
+
+    def test_project(self, fixedrank):
+        X = fixedrank._randomPoint()
+        U, Sigma, V = X
+        Z = np.random.randn(fixedrank.m, fixedrank.n)
+        U_p, M, V_p = fixedrank._project(X, Z)
+        assert U_p.shape == (fixedrank.m, fixedrank.r)
+        assert M.shape == (fixedrank.r, fixedrank.r)
+        assert V_p.shape == (fixedrank.n, fixedrank.r)
+        assert np.allclose(U.T @ U_p, np.zeros((fixedrank.r, fixedrank.r)))
+        assert np.allclose(V.T @ V_p, np.zeros((fixedrank.r, fixedrank.r)))

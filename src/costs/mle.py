@@ -1,5 +1,7 @@
 import numpy as np
-from numpy.linalg import norm
+import scipy.sparse as sparse
+
+from .cost import Cost
 
 class MLE(Cost):
 
@@ -12,10 +14,10 @@ class MLE(Cost):
         self.B = B
 
     def _eval(self, xx):
-        return 0.5 * (norm((xx - self.Y) * self.B) ** 2)
+        return 0.5 * (sparse.linalg.norm(self.B.multiply(self.manifold._reprToPoint(xx) - self.Y)) ** 2)
 
     def _euclideanGradient(self, xx):
-        return ((xx - self.Y) * self.B)
+        return self.B.multiply(self.manifold._reprToPoint(xx) - self.Y)
 
     def _euclideanHessian(self, xx, hh):
-        return hh * self.B
+        return self.B.multiply(self.manifold._reprToPointTangent(xx, hh))

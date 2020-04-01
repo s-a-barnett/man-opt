@@ -1,5 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
+import scipy.sparse as sparse
+
+from .cost import Cost
 
 class RegularizedMLE(Cost):
 
@@ -12,8 +15,8 @@ class RegularizedMLE(Cost):
         self.B = B
         self.mu = mu
 
-        self.f = lambda X: 0.5 * (norm((X - Y) * B) ** 2)
-        self.gradf = lambda X: ((X - Y) * B)
+        self.f = lambda X: 0.5 * (sparse.linalg.norm((B.multiply(X - Y))) ** 2)
+        self.gradf = lambda X: (B.multiply(X - Y))
 
     def _eval(self, xx):
         L, R = xx
@@ -23,17 +26,17 @@ class RegularizedMLE(Cost):
     def _euclideanGradient(self, xx):
         L, R = xx
         grad = self.gradf(self.manifold._reprToPoint(xx))
-        left = (grad@R) + (self.mu * (L@((L.T@L) - (R.T@R))))
-        right = (grad.T@L) - (self.mu * (R@((L.T@L) - (R.T@R))))
+        left = (grad@R) + (L@((L.T@L) - (R.T@R)))*(self.mu)
+        right = (grad.T@L) - (R@((L.T@L) - (R.T@R)))*(self.mu)
         return left, right
 
     def _euclideanHessian(self, xx, hh):
         L, R = xx; U_L, U_R = hh
-        left = ((L@U_R.T) * self.B).T @ L + \
-               self.mu * U_R @ ((R.T @ R) - (L.T @ L)) + \
-               self.mu * R @ ((U_R.T@R) + (R.T@U_R))
-        right = ((U_L@R.T) * self.B) @ R + \
-               self.mu * U_L @ ((L.T @ L) - (R.T @ R)) + \
-               self.mu * L @ ((U_L.T@L) + (L.T@U_L))
+        right = (self.B.multiply(L@U_R.T)).T @ L + \
+               (U_R @ ((R.T @ R) - (L.T @ L)))*(self.mu) + \
+               (R @ ((U_R.T@R) + (R.T@U_R)))*(self.mu)
+        left = (self.B.multiply(U_L@R.T)) @ R + \
+               (U_L @ ((L.T @ L) - (R.T @ R)))*(self.mu) + \
+               (L @ ((U_L.T@L) + (L.T@U_L)))*(self.mu)
 
         return left, right

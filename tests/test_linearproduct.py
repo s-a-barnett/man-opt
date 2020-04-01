@@ -35,3 +35,9 @@ class TestLinearProduct:
 
         assert np.allclose(linearproduct._retract(xx, yy)[0], 2*np.ones((m, r)))
         assert np.allclose(linearproduct._retract(xx, yy)[1], 2*np.ones((n, r)))
+
+    def test_retractZero(self, linearproduct):
+        X = linearproduct._randomPoint()
+        Z = linearproduct._zeroTangent()
+        R = linearproduct._retract(X, Z)
+        assert np.allclose(linearproduct._reprToPoint(X), linearproduct._reprToPoint(R))

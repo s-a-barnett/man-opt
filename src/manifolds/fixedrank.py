@@ -39,8 +39,8 @@ class FixedRank(Manifold):
     def _project(self, xx, zz):
         U, Sigma, V = xx
         M = U.T @ zz @ V
-        U_p = (Z@V) - (U@M)
-        V_p = (Z.T@U) - (V@M.T)
+        U_p = (zz@V) - (U@M)
+        V_p = (zz.T@U) - (V@M.T)
         return U_p, M, V_p
 
     def _riemannianGradient(self, euclideanGradient):
@@ -50,7 +50,9 @@ class FixedRank(Manifold):
 
         def rH(xx, hh):
             U, Sigma, V = xx; U_p, M, V_p = hh
-            Sigma_inv = np.diag(1 / np.diag(Sigma))
+            Sigma_inv = np.diag(np.divide(1, np.diag(Sigma), \
+                                out=np.zeros_like(np.diag(Sigma)), \
+                                where=np.diag(Sigma)!=0))
             Z = euclideanGradient(xx); Zdot = euclideanHessian(xx, hh)
             Pu_orth = np.eye(self.m) - (U @ U.T)
             Pv_orth = np.eye(self.n) - (V @ V.T)
@@ -64,10 +66,9 @@ class FixedRank(Manifold):
         return rH
 
     def _randomPoint(self):
-        U = ortho_group.rvs(self.m); V = ortho_group.rvs(self.n)
-        Sigma = np.zeros((self.m, self.n))
-        di = np.diag_indices(self.r)
-        Sigma[di] = np.sort(np.random.rand(self.r))[::-1]
+        a = np.random.randn(self.m, self.r); b = np.random.randn(self.n, self.r)
+        U, _ = qr(a); V, _ = qr(b)
+        Sigma = np.diag(np.random.randn(self.r))
         return U, Sigma, V
 
     def _zeroTangent(self):
