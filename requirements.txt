@@ -1,5 +1,8 @@
 sklearn
 progressbar2
 pytest
+matplotlib
+numpy
+scipy
 seaborn
 pandas

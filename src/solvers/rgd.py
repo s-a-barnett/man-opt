@@ -7,7 +7,7 @@ import pdb
 class RiemannianGradientDescent(Solver):
 
     def __init__(self, manifold, cost, initGuess='random', maxiter=1000,
-                 timeiter=None, verbose=False, tau=0.5, r=1e-4):
+                 timeiter=None, verbose=False, tau=0.5, r=1e-4, mingradnorm=1e-6):
         self.manifold = manifold
         self.cost = cost
         self.rmnGrad = self.manifold._riemannianGradient(self.cost._euclideanGradient)
@@ -17,6 +17,7 @@ class RiemannianGradientDescent(Solver):
         self.verbose = verbose
         self.tau = tau
         self.r = r
+        self.mingradnorm = mingradnorm
 
         if initGuess == 'random':
             self.initGuess = manifold._randomPoint()
@@ -68,6 +69,9 @@ class RiemannianGradientDescent(Solver):
                 xx, fxx, grad = self._step(xx)
                 grads.append(grad)
                 costs.append(fxx)
+                if grad < self.mingradnorm:
+                    toc = time.time()
+                    break
                 if ii == self.timeiter-1:
                     toc = time.time()
 

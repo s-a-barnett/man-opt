@@ -60,21 +60,21 @@ def main(args):
 
     xx_final, costs, grads, time = solver.solve()
     print('total time to compute: {} seconds'.format(time))
-    print(grads[-1])
-    print(np.min(grads))
-    print(np.min(costs))
+    print('final gradient value: {}'.format(grads[-1]))
+    print('minimum gradient value: {}'.format(np.min(grads)))
+    print('minimum cost value: {}'.format(np.min(costs)))
 
     df_costs = pd.DataFrame(dict(time=np.arange(len(costs)),
-                            value=costs))
+                            cost=costs))
     df_grads = pd.DataFrame(dict(time=np.arange(len(grads)),
-                            value=grads))
+                            gradient_norm=grads))
 
     plt.figure()
-    g = sns.relplot(x="time", y="value", kind="line", data=df_costs)
+    g = sns.relplot(x="time", y="cost", kind="line", data=df_costs)
     g.fig.autofmt_xdate()
     g.savefig("costs.png")
     plt.figure()
-    g = sns.relplot(x="time", y="value", kind="line", data=df_grads)
+    g = sns.relplot(x="time", y="gradient_norm", kind="line", data=df_grads)
     g.fig.autofmt_xdate()
     g.savefig("grads.png")
 

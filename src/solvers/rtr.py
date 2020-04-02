@@ -8,7 +8,7 @@ class RiemannianTrustRegions(Solver):
     def __init__(self, manifold, cost, initGuess='random', maxiter=1000,
                  timeiter=None, verbose=False, DeltaBar=None, Delta0=None,
                  rhoPrime=0.1, rhoReg=1e3, epsMac=1e-16, kappa=0.1, theta=1.,
-                 maxiter_tCG=None):
+                 maxiter_tCG=None, mingradnorm=1e-6):
         self.manifold = manifold
         self.cost = cost
         self.rmnGrad = self.manifold._riemannianGradient(self.cost._euclideanGradient)
@@ -31,7 +31,8 @@ class RiemannianTrustRegions(Solver):
         self.epsMac = epsMac
         self.kappa = kappa
         self.theta = theta
-        
+        self.mingradnorm = mingradnorm
+
         if maxiter_tCG == None:
             self.maxiter_tCG = maxiter
         else:
@@ -128,6 +129,9 @@ class RiemannianTrustRegions(Solver):
                 xx, Delta, fxx, grad = self._step(xx, Delta)
                 grads.append(grad)
                 costs.append(fxx)
+                if grad < self.mingradnorm:
+                    toc = time.time()
+                    break
                 if ii == self.timeiter-1:
                     toc = time.time()
 
