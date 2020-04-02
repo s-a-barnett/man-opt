@@ -38,7 +38,7 @@ class Manifold(ABC):
         pass
 
     @abstractmethod
-    def _randomPoint(self):
+    def _randomPoint(self, *args, **kwargs):
         pass
 
     @abstractmethod

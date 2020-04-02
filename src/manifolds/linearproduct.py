@@ -30,8 +30,8 @@ class LinearProduct(Manifold):
     def _riemannianHessian(self, euclideanGradient, euclideanHessian):
         return euclideanHessian
 
-    def _randomPoint(self):
-        return np.random.randn(self.m, self.r), np.random.randn(self.n, self.r)
+    def _randomPoint(self, scale=1e-2):
+        return scale*np.random.randn(self.m, self.r), scale*np.random.randn(self.n, self.r)
 
     def _zeroTangent(self):
         return np.zeros((self.m, self.r)), np.zeros((self.n, self.r))

@@ -46,10 +46,10 @@ class StiefelProduct(Manifold):
 
         return rH
 
-    def _randomPoint(self):
+    def _randomPoint(self, scale=1.):
         a = np.random.randn(self.m, self.r)
         q, _ = qr(a)
-        return q, np.random.randn(self.n, self.r)
+        return scale*q, scale*np.random.randn(self.n, self.r)
 
     def _zeroTangent(self):
         return np.zeros((self.m, self.r)), np.zeros((self.n, self.r))
