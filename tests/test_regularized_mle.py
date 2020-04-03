@@ -81,6 +81,9 @@ class TestRegularizedMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e-2], linewidth=2.0)
+        plt.title("gradient check: LinearProduct")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()
 
     def test_riemannianHessian(self, linearproduct, regularizedmle):
@@ -119,6 +122,9 @@ class TestRegularizedMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e1], linewidth=2.0)
+        plt.title("Hessian check: LinearProduct")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()
 
     def test_riemannianGradientStiefel(self, stiefelproduct, regularizedmle):
@@ -146,6 +152,9 @@ class TestRegularizedMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e-2], linewidth=2.0)
+        plt.title("gradient check: StiefelProduct")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()
 
     def test_riemannianHessianStiefel(self, stiefelproduct, regularizedmle):
@@ -186,4 +195,7 @@ class TestRegularizedMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e1], linewidth=2.0)
+        plt.title("Hessian check: StiefelProduct")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()

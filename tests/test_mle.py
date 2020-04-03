@@ -67,6 +67,9 @@ class TestMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e-2], linewidth=2.0)
+        plt.title("gradient check: FixedRank")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()
 
     def test_riemannianHessian(self, fixedrank, mle):
@@ -103,4 +106,7 @@ class TestMLE:
         ax.set(xscale="log", yscale="log")
         sns.regplot("x", "y", data, ax=ax, scatter_kws={"s": 100})
         plt.plot([1e-6, 1e-3], [1e-8, 1e1], linewidth=2.0)
+        plt.title("Hessian check: FixedRank")
+        plt.xlabel("t")
+        plt.ylabel("E(t)")
         plt.show()
