@@ -47,36 +47,49 @@ def main(args):
 
     mu = args.mu # regularization parameter
 
-    manifold = manifoldFactory(args.manifold, m, n, r)
+    fixedrank = manifoldFactory('fixedrank', m, n, r)
+    linear = manifoldFactory('linearproduct', m, n, r)
+    stiefel = manifoldFactory('stiefelproduct', m, n, r)
 
-    if args.manifold == 'fixedrank':
-        cost = costFactory('mle', manifold, Y, B)
-    elif args.manifold == 'stiefelproduct':
-        cost = costFactory('regularized_mle', manifold, Y, B, mu=0.)
-    else:
-        cost = costFactory('regularized_mle', manifold, Y, B, mu=args.mu)
+    # ensure same initial guess
+    initGuess_fixedrank = fixedrank._randomPoint(scale=args.scale)
+    initGuess_product = (initGuess_fixedrank[0], initGuess_fixedrank[2]@initGuess_fixedrank[1])
 
-    solver = solverFactory(args.solver, manifold, cost, maxiter=args.maxiter, verbose=True)
+    cost_fixedrank = costFactory('mle', fixedrank, Y, B)
+    cost_linear = costFactory('regularized_mle', linear, Y, B, mu=args.mu)
+    cost_stiefel = costFactory('regularized_mle', stiefel, Y, B, mu=0)
 
-    xx_final, costs, grads, time = solver.solve()
-    print('total time to compute: {} seconds'.format(time))
-    print('final gradient value: {}'.format(grads[-1]))
-    print('minimum gradient value: {}'.format(np.min(grads)))
-    print('minimum cost value: {}'.format(np.min(costs)))
+    rtr_fixedrank = solverFactory('rtr', fixedrank, cost_fixedrank, maxiter=args.maxiter, verbose=True, initGuess=initGuess_fixedrank)
+    rtr_linear = solverFactory('rtr', linear, cost_linear, maxiter=args.maxiter, verbose=True, initGuess=initGuess_product)
+    rtr_stiefel = solverFactory('rtr', stiefel, cost_stiefel, maxiter=args.maxiter, verbose=True, initGuess=initGuess_product)
+    rgd_fixedrank = solverFactory('rgd', fixedrank, cost_fixedrank, maxiter=args.maxiter, verbose=True, initGuess=initGuess_fixedrank)
+    rgd_linear = solverFactory('rgd', linear, cost_linear, maxiter=args.maxiter, verbose=True, initGuess=initGuess_product)
+    rgd_stiefel = solverFactory('rgd', stiefel, cost_stiefel, maxiter=args.maxiter, verbose=True, initGuess=initGuess_product)
 
-    df_costs = pd.DataFrame(dict(time=np.arange(len(costs)),
-                            cost=costs))
-    df_grads = pd.DataFrame(dict(time=np.arange(len(grads)),
-                            gradient_norm=grads))
+    df_list = []
+    for solver in [rtr_linear, rtr_stiefel, rtr_fixedrank, rgd_linear, rgd_stiefel, rgd_fixedrank]:
+        xx_final, costs, grads, time = solver.solve()
+        df = pd.DataFrame(dict(num_iterations=np.arange(len(costs)),
+                                cost=costs, solver=type(solver).__name__,
+                                manifold=type(solver.manifold).__name__,
+                                grad=grads))
+        df_list.append(df)
+
+    df = pd.concat(df_list)
+    plt.figure()
+    g = sns.relplot(x="num_iterations", y="cost", hue="manifold", col="solver", kind="line", data=df)
+    plt.title("(m, n, r) = ({}, {}, {})".format(m, n, r))
+    g.fig.autofmt_xdate()
+    g.savefig("figures/costs_m{}n{}r{}.png".format(m, n, r))
 
     plt.figure()
-    g = sns.relplot(x="time", y="cost", kind="line", data=df_costs)
+    g = sns.relplot(x="num_iterations", y="grad", hue="manifold", col="solver", kind="line", data=df)
+    plt.ylabel("|grad f|")
+    plt.title("(m, n, r) = ({}, {}, {})".format(m, n, r))
     g.fig.autofmt_xdate()
-    g.savefig("costs.png")
-    plt.figure()
-    g = sns.relplot(x="time", y="gradient_norm", kind="line", data=df_grads)
-    g.fig.autofmt_xdate()
-    g.savefig("grads.png")
+    g.savefig("figures/grads_m{}n{}r{}.png".format(m, n, r))
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -84,10 +97,9 @@ if __name__ == '__main__':
     parser.add_argument("-n", default=500, type=int)
     parser.add_argument("-r", default=5, type=int)
     parser.add_argument("--osf", default=6, type=int)
-    parser.add_argument('--manifold', default='fixedrank', type=str)
-    parser.add_argument("--solver", default='rtr', type=str)
-    parser.add_argument("--maxiter", default=1000, type=int)
-    parser.add_argument("--mu", default=1e2, type=float)
+    parser.add_argument("--maxiter", default=500, type=int)
+    parser.add_argument("--mu", default=1, type=float)
+    parser.add_argument("--scale", default=1e-2, type=float)
 
     args = parser.parse_args()
 

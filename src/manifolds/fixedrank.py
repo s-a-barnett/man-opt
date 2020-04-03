@@ -68,10 +68,10 @@ class FixedRank(Manifold):
 
         return rH
 
-    def _randomPoint(self):
+    def _randomPoint(self, scale=1.):
         a = np.random.randn(self.m, self.r); b = np.random.randn(self.n, self.r)
         U, _ = qr(a); V, _ = qr(b)
-        Sigma = np.diag(np.random.randn(self.r))
+        Sigma = scale * np.diag(np.random.randn(self.r))
         return U, Sigma, V
 
     def _zeroTangent(self):
